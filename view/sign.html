@@ -1,0 +1,191 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>登陆/注册</title>
+    <link rel="stylesheet" type="text/css" href="resource/main.css?version=1.0.0.1" media="screen" />
+    <script type="text/javascript" src="resource/jquery-3.3.1.min.js?version=1.0.0.1"></script>
+    <script type="text/javascript" src="resource/jquery.md5.js?version=1.0.0.1"></script>
+    <style type="text/css">
+        .control {
+            border: 1px solid #aaa;
+            border-radius: 20px;
+            width: 300px;
+            height: 300px;
+            margin: auto;
+            margin-top: 100px;
+        }
+
+        .control ul:first-child {
+            padding-top: 50px;
+        }
+
+        .control ul {
+            width: 230px;
+            margin: auto;
+        }
+
+        .control .line1 {
+            height: 30px;
+            line-height: 30px;
+        }
+
+        .control .line2 {
+            height: 40px;
+        }
+
+        .control .line3 {
+            padding-top: 20px;
+            text-align: center;
+        }
+
+        .control [type=button] {
+            width: 100px;
+            height: 32px;
+            border-radius: 25px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="control">
+        <ul>
+            <li class="line1">手机号：</li>
+            <li class="line2">
+                <input type="text" class="box1" id="phone" maxlength="11" />
+            </li>
+        </ul>
+        <ul>
+            <li class="line1">密码：</li>
+            <li class="line2">
+                <input type="password" class="box1" id="pwd" />
+            </li>
+        </ul>
+        <ul>
+            <li class="line3">
+                <input type="button" id="btnLogin" value="立即登陆" />
+                <input type="button" id="btnAdd" value="立即注册" />
+            </li>
+        </ul>
+        <ul>
+            <li class="line3">
+                <div id="output"></div>
+            </li>
+        </ul>
+    </div>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $.ajax({
+                url: "../control/sign.php?act=status",
+                type: "POST",
+                data: {},
+                dataType: "json",
+                error: function () {
+                    alert('Error loading XML document');
+                },
+                success: function (data, status) { //如果调用php成功  
+                    console.log(status);
+                    console.log(data);
+                    $("#output").html(data.msg);
+                    setTimeout(() => {
+                        $("#output").html("")
+                    }, 1000);
+
+                    if (data.id == 100) {
+                        location.href = "edit.html";
+                    }
+                }
+            });
+        });
+
+
+        function check() {
+            var _phone = $("#phone").val().trim();
+            var _pwd = $("#pwd").val().trim();
+            var _check = 0;
+            if (_phone.length <= 0) {
+                $("#phone").css("border", "1px solid red");
+                _check++;
+            }
+            if (_pwd.length <= 0) {
+                $("#pwd").css("border", "1px solid red");
+                _check++;
+            }
+            if (_check > 0) {
+                $("#output").html("账号密码不能为空");
+                setTimeout(() => {
+                    $("#output").html("")
+                }, 1000);
+                return 0;
+            }
+            return 1;
+        }
+        $(document).ready(function () {
+            $("#btnAdd").click(function () {
+                var res = check();
+                if (res <= 0) {
+                    return;
+                }
+
+                $.ajax({
+                    url: "../control/sign.php?act=add",
+                    type: "POST",
+                    data: {
+                        phone: $("#phone").val().trim(),
+                        pwd: $.md5($("#pwd").val().trim()) //$.md5('1234')
+                    },
+                    dataType: "json",
+                    error: function () {
+                        alert('Error loading XML document');
+                    },
+                    success: function (data, status) { //如果调用php成功  
+                        console.log(status);
+                        console.log(data);
+                        $("#output").html(data.msg);
+                        setTimeout(() => {
+                            $("#output").html("")
+                        }, 1000);
+
+                        if (data.id == 100) {
+                            location.href = "edit.html";
+                        }
+                    }
+                });
+            });
+
+            $("#btnLogin").click(function () {
+                var res = check();
+                if (res <= 0) {
+                    return;
+                }
+
+                $.ajax({
+                    url: "../control/sign.php?act=login",
+                    type: "POST",
+                    data: {
+                        phone: $("#phone").val().trim(),
+                        pwd: $.md5($("#pwd").val().trim())
+                    },
+                    dataType: "json",
+                    error: function () {
+                        alert('Error loading XML document');
+                    },
+                    success: function (data, status) { //如果调用php成功  
+                        console.log(status);
+                        console.log(data);
+                        $("#output").html(data.msg);
+                        setTimeout(() => {
+                            $("#output").html("")
+                        }, 1000);
+                        
+                        if (data.id == 100) {
+                            location.href = "edit.html";
+                        }
+                    }
+                });
+            });
+        })
+    </script>
+</body>
+
+</html>
