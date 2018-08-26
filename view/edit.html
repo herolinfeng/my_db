@@ -3,10 +3,17 @@
 <head>
     <meta charset="utf-8" />
     <title>编辑个人信息</title>
-    <link rel="stylesheet" type="text/css" href="resource/main.css?version=1.0.0.2" media="screen" />
-    <script type="text/javascript" src="resource/jquery-3.3.1.min.js?version=1.0.0.2"></script>
-    <script type="text/javascript" src="resource/jquery.md5.js?version=1.0.0.2"></script>
+    <link rel="stylesheet" type="text/css" href="resource/main.css?version=1.0.0.3" media="screen" />
+    <script type="text/javascript" src="resource/jquery-3.3.1.min.js?version=1.0.0.3"></script>
+    <script type="text/javascript" src="resource/jquery.md5.js?version=1.0.0.3"></script>
+
+
     <style type="text/css">
+        .bar {
+            padding: 10px 20px 10px 20px;
+            text-align: right;
+        }
+
         .control {
             border: 1px solid #aaa;
             border-radius: 20px;
@@ -15,6 +22,16 @@
             padding-bottom: 30px;
             margin: auto;
             margin-top: 100px;
+        }
+
+        .photo-line {
+            text-align: center
+        }
+
+        .photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%
         }
 
         /* .control ul:first-child {
@@ -45,27 +62,120 @@
             height: 32px;
             border-radius: 25px;
         }
+
+        .file {
+            display: none
+        }
+
+        .tools {
+            width: 300px;
+            margin: auto;
+            margin-top: 30px;
+        }
+
+        .tools ul {
+            height: 50px;
+            line-height: 50px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tools li {
+            float: left;
+        }
+
+        .tools ul a {
+            display: block;
+        }
+
+        .tools .left {
+            float: left;
+        }
+
+        .tools .right {
+            float: right
+        }
+
+        .tools ul:last-child {
+            border: 0px;
+        }
     </style>
 </head>
 
 <body>
+    <div class="bar">
+        <a href="javascript:void(0)" id="btnLogOut">[退出登录]</a>
+    </div>
     <div class="control">
         <ul>
-            <li class="line1">手机号：</li>
+            <li class="photo-line">
+                <img src="#" alt="" class="photo" id="photo" />
+                <input type="hidden" id="hid_photo" value="" />
+            </li>
+        </ul>
+        <ul>
+            <li class="line1">&nbsp;</li>
             <li class="line2">
                 <input type="text" class="box1" id="phone" maxlength="11" readonly />
+            </li>
+        </ul>
+        <ul>
+            <li class="line1">昵称：</li>
+            <li class="line2">
+                <input type="text" class="box1" id="nick_name" maxlength="12" />
+            </li>
+        </ul>
+        <ul>
+            <li class="line1">签名：</li>
+            <li class="line2">
+                <input type="text" class="box1" id="signature" maxlength="11" />
+            </li>
+        </ul>
+        <ul>
+            <li class="line1">注册时间：</li>
+            <li class="line2">
+                <input type="text" class="box1" id="add_time" maxlength="11" readonly />
+            </li>
+        </ul>
+        <ul>
+            <li class="line3">
+                <input type="button" id="btnSave" value="保存" />
+            </li>
+        </ul>
+    </div>
+    <div class=tools>
+        <ul>
+            <li>
+                <a href="dynamic.html">好友动态</a>
+            </li>
+            <li class="right">
+                <a href="dynamic.html">></a>
+            </li>
+        </ul>
+        <ul>
+            <li>
+                <a href="news.html">新闻资讯</a>
+            </li>
+            <li class="right">
+                <a href="news.html">></a>
+            </li>
+        </ul>
+        <ul>
+            <li>
+                <a href="collect.html">我的收藏</a>
+            </li>
+            <li class="right">
+                <a href="collect.html">></a>
             </li>
         </ul>
     </div>
     <script type="text/javascript">
         $(document).ready(function () {
+
+
             $.ajax({
-                url: "../control/sign.php?act=add",
+                url: "../control/edit.php",
                 type: "POST",
-                data: {
-                    phone: $("#phone").val().trim(),
-                    pwd: $.md5($("#pwd").val().trim()) //$.md5('1234')
-                },
+                data: {},
                 dataType: "json",
                 error: function () {
                     alert('Error loading XML document');
@@ -73,12 +183,64 @@
                 success: function (data, status) { //如果调用php成功  
                     console.log(status);
                     console.log(data);
-                    $("#output").html(data.msg);
-                    setTimeout(() => {
-                        $("#output").html("")
-                    }, 1000);
+                    // alert(data.id);
+                    if (data.id == 100) {
+                        var obj = data.obj[0];
+                        // alert(obj.phone);
+                        $("#photo").attr("src", obj.photo == null || obj.photo.trim().length == 0 ?
+                            "resource/img/photo.jpg" : obj.photo);
+                        $("#phone").val(obj.phone);
+                        $("#nick_name").val(obj.nick_name);
+                        $("#signature").val(obj.signature);
+                        $("#add_time").val(obj.add_time);
+                    } else {
+                        location.href = "sign.html";
+                    }
                 }
             });
+
+            $("#btnSave").click(function () {
+                $.ajax({
+                    url: "../control/edit.php?act=edit",
+                    type: "POST",
+                    data: {
+                        photo: $("#hid_photo").val().trim(),
+                        nick_name: $("#nick_name").val().trim(),
+                        signature: $("#signature").val().trim()
+                    },
+                    dataType: "json",
+                    error: function () {
+                        alert('Error loading XML document');
+                    },
+                    success: function (data, status) { //如果调用php成功  
+                        console.log(status);
+                        console.log(data);
+                        if (data.id == 100) {
+
+                        }
+                    }
+                });
+            })
+
+            $("#btnLogOut").click(function () {
+                $.ajax({
+                    url: "../control/sign.php?act=out",
+                    type: "POST",
+                    data: {},
+                    dataType: "json",
+                    error: function () {
+                        alert('Error loading XML document');
+                    },
+                    success: function (data, status) { //如果调用php成功  
+                        console.log(status);
+                        console.log(data);
+                        if (data.id == 100) {
+                            alert(data.msg);
+                            location.href = "sign.html";
+                        }
+                    }
+                });
+            })
         });
     </script>
 </body>

@@ -1,0 +1,33 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>simple upload</title>
+    <script type="text/javascript" src="../../view/resource/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="../php-ajax-upload-file/js/jquery.form.min.js"></script>
+</head>
+
+<body>
+    <form id=formId>
+        <input type="file" name="upload_file" id="upload_file" />
+        <div id="output"></div>
+    </form>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var opt = {
+                type: 'post',
+                datatype: 'json',
+                url: 'upload.php',
+                success: function (data) {
+                    console.log(data);
+                }
+            };
+            $("#upload_file").change(function () {
+                alert($("#upload_file").val());
+                $("#formId").ajaxSubmit(opt); //相当于from.submit()
+            });
+        })
+    </script>
+</body>
+
+</html>

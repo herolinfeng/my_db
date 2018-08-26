@@ -25,7 +25,7 @@ class Sign
     {
         $res = new My_Result();
         if (strlen($phone . trim()) <= 0 && strlen($phone . trim()) <= 0) {
-            $res->id = -101;
+            $res->id = -100;
             $res->msg = "账号或密码不能为空";
             // die(json_encode($res->Show()));
             die(json_encode($res));
@@ -37,7 +37,7 @@ class Sign
             $res->id = 100;
             $res->msg = "登陆成功";
         } else {
-            $res->id = -102;
+            $res->id = -101;
             $res->msg = "登陆失败";
         }
         // die(json_encode($res->Show()));
@@ -73,6 +73,22 @@ class Sign
         // die(json_encode($res->Show()));
         die(json_encode($res));
     }
+
+    public function Logout()
+    {
+        $res = new My_Result();
+        $user = new My_user();
+        $return = $user->Logout();
+        // var_dump($return);
+        if (!$return) {
+            $res->id = 100;
+            $res->msg = "退出成功";
+        } else {
+            $res->id = -100;
+            $res->msg = "退出失败";
+        }
+        die(json_encode($res));
+    }
 }
 
 // if(!isset($_POST['submit'])){
@@ -89,6 +105,9 @@ switch ($act) {
         break;
     case "add":
         $sign->AddUser($phone, $pwd);
+        break;
+    case "out":
+        $sign->Logout();
         break;
     default:
         $sign->IsLogin();

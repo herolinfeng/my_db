@@ -1,7 +1,7 @@
 <?php
 
 header('Content-Type:text/html; charset=UTF-8;');
-error_reporting(E_ALL^E_NOTICE^E_WARNING);
+error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
 
 class My_DB
 {
@@ -13,7 +13,7 @@ class My_DB
     public function GetConn()
     {
         $conn = new mysqli($this->host, $this->name, $this->pwd, $this->db);
-        
+
         if ($conn->connect_errno) {
             // var_dump(mysqli_connect_error());
             return null;
@@ -38,12 +38,19 @@ class My_DB
     public function Insert($conn, $sql)
     {
         $result = $conn->query($sql);
-        return $result; // bool
+        if ($result) {
+            return $conn->insert_id;
+        } else {
+            return 0;
+        }
+
+        // return $result; // bool
     }
 
     public function Update($conn, $sql)
     {
-
+        $result = $conn->query($sql);
+        return $result; // bool
     }
 
     public function Delete($conn, $sql)

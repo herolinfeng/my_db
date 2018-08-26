@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>图片自动缩放居中插件</title>
+<script src="http://www.jq22.com/jquery/jquery-1.10.2.js"></script>
+
+<style>
+	*{
+		padding:0;
+		margin: 0;
+	}
+	input[type=number],input[type=text]{
+		width: 60px;
+	}
+	#imgBoxGg{
+		text-align: center;
+	}
+	.ccbf{
+		margin-right: 10px;
+	}
+	#imgBox{
+		width: 200px;
+		height: 200px;
+		border: 5px solid #000;
+		margin: 15px auto;
+		overflow:hidden;
+		position: relative;
+		z-index: 2;
+	}
+	#img{
+		position: relative;
+		z-index: 1;
+	}
+	#imgBoxGg{
+		width: 200px;
+		margin: 0 auto;
+		text-align: center;
+	}
+	#bottom{
+		border-top: 1px solid #dcdddd;
+		margin-top: 20px;
+	}
+	#bottom li{
+		float: left;
+		width: 190px;
+		margin: 3px;
+		border: 2px solid transparent;
+		list-style: none;
+	}
+	#bottom li:hover{
+		border: 2px solid #333;
+	}
+	#bottom img{
+		float: left;
+		width: 180px;
+		margin:3px;
+	}
+</style>
+</head>
+<body>
+
+<div style="width: 800px;margin: 0 auto;padding:15px;">
+
+<!-- <p style="margin-bottom: 20px;border-bottom: 1px solid #dcdddd;">
+	说明：<br/>
+	对需要缩放并自动居中的缩略图加上加载事件onload="DrawImage(ImgID, width_s, height_s)"，ImgID为图片元素，width_s为缩略图宽度，height_s为缩略图高度。<br/>
+	如果需要自适应或缩略图大小可修改，可以通过js获取宽高后再向DrawImage(ImgID, width_s, height_s)传入参数执行。<br/>
+	注：假如img的id为img,ImgID传入参数需为<span style="background: #ff0;"> $("#img")[0] </span>。
+</p> -->
+
+<table>
+	<tr>
+		<td width="200"><input type="file" name="file" id="doc" style="width:150px;" onchange="javascript:setImagePreview();"></td>
+		<td width="400">盒子 宽*高(px)：<input type="number" name="width" value="200">*<input type="number" name="height" value="200"> <input type="button" value="修改" onclick="imgBoxXg()"></td>
+		<td width="200">超出部分：<input class="ccbf" type="button" name="jc" value="剪裁"><input class="ccbf" type="button" name="bjc" value="不剪裁"></td>
+	</tr>
+</table>
+
+<div id="imgBox">
+	<img id="img" onload="DrawImage_box(this)">
+</div>
+<div id="imgBoxGg"><span class="width">200</span>px*<span class="height">200</span>px</div>
+
+
+<div id="bottom">
+	<ul>
+		<li><img src="image/1.jpg"></li>
+		<li><img src="image/2.jpg"></li>
+		<li><img src="image/3.jpg"></li>
+		<li><img src="image/4.jpg"></li>
+		<li><img src="image/789489746.jpg"></li>
+	</ul>
+</div>
+
+
+</div>
+
+
+
+<script type="text/javascript">
+//获取缩略图盒子宽高后再执行缩放
+function DrawImage_box(ImgID) {
+    var width_img=$("#imgBox").width();
+    var height_img=$("#imgBox").height();
+    console.log(width_img+","+height_img);
+    DrawImage(ImgID, width_img, height_img);
+}
+
+
+//图片缩放居中核心功能
+function DrawImage(ImgID, width_s, height_s) {
+    var image = new Image();
+    image.src = ImgID.src;
+    if (image.width > 0 && image.height > 0) {
+        flag = true;
+        if (image.width / image.height <= width_s / height_s) {
+            ImgID.width = width_s;
+            var height = (image.height * width_s) / image.width;
+            ImgID.height = height;
+            ImgID.style.marginTop = -(height - height_s)/2 + "px";
+        } else {
+            ImgID.height = height_s;
+            var width = (image.width * height_s) / image.height;
+            ImgID.width = width;
+            ImgID.style.marginLeft = -(width - width_s)/2 + "px";
+        }
+    }
+}
+</script>
+
+<script type="text/javascript">
+//下面用于选择是否需要剪裁的图片效果
+$(".ccbf").click(function(){
+	if($(this).attr("name")=="jc"){
+		$("#imgBox").css("overflow","hidden");	
+	}
+	if($(this).attr("name")=="bjc"){
+		$("#imgBox").css("overflow","visible");	
+	}
+})
+
+
+//下面用于选择自带图片预览
+$("#bottom li").click(function(){
+	$("#img").css({"margin-left":0,"margin-top":0})
+	$("#img").attr("src",$(this).children("img").attr("src"));
+})
+
+
+//下面用于图片盒子大小修改
+function imgBoxXg(){
+	var width = $("input[name=width]").val();
+	var height = $("input[name=height]").val();
+	$("#imgBox").css({"width":width+"px","height":height+"px"});
+	$("#imgBoxGg").width(width);
+	$("#imgBoxGg .width").html(width);
+	$("#imgBoxGg .height").html(height);
+
+    var imgId = $("#img")[0];
+    $("#img").css({"margin-left":0,"margin-top":0})
+    DrawImage_box(imgId);
+}
+
+
+
+//下面用于图片上传预览功能
+function setImagePreview(avalue) {
+var docObj=document.getElementById("doc");
+var imgObj=document.getElementById("img");
+imgObj.src = window.URL.createObjectURL(docObj.files[0]);
+return true;
+}
+</script>
+</body>
+</html>

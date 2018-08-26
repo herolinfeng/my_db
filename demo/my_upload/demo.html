@@ -1,0 +1,239 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>我的上传demo</title>
+    <!-- <script type="text/javascript" src="../php-ajax-upload-file/js/jquery-1.10.2.min.js"></script> -->
+    <script type="text/javascript" src="../../view/resource/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="../php-ajax-upload-file/js/jquery.form.min.js"></script>
+    <style type="text/css">
+        * {
+            margin: 0px;
+            padding: 0px;
+            font-family: 微软雅黑;
+            font-size: 12px;
+        }
+
+        ul {
+            list-style: none;
+            height: 40px;
+        }
+
+        li {
+            float: left;
+            padding-right: 10px;
+        }
+
+        #upload-wrapper {
+            width: 50%;
+            margin-right: auto;
+            margin-left: auto;
+            margin-top: 50px;
+            padding: 50px;
+            border-radius: 20px;
+            background: #f0f0f0;
+        }
+
+        #upload-wrapper h3 {
+            font-size: 24px;
+            padding: 0px 0px 10px 0px;
+            margin: 0px 0px 20px 0px;
+            margin-top: -30px;
+            border-bottom: 1px dotted #DDD;
+        }
+
+        #upload-wrapper input[type=file] {
+            padding: 6px;
+            background: #FFF;
+            border-radius: 5px;
+            color: #FFF;
+            display: none;
+        }
+
+        #upload-wrapper #btnFile {
+            border: none;
+            padding: 10px;
+            background: #61BAE4;
+            border-radius: 5px;
+            color: #FFF;
+        }
+
+        /* #upload-wrapper input[type=submit] {
+            border: none;
+            padding: 10px;
+            background: #61BAE4;
+            border-radius: 5px;
+            color: #FFF;
+        } */
+
+        #output {
+            height: 40px;
+            margin-top: 10px
+        }
+
+        /* prograss bar */
+
+        #progressBox {
+            border: 1px solid #fff;
+            padding: 1px;
+            position: relative;
+            width: 400px;
+            border-radius: 3px;
+            margin-top: 10px;
+            display: none;
+            text-align: left;
+        }
+
+        #progressBar {
+            height: 20px;
+            border-radius: 3px;
+            background-color: #fff;
+            width: 1%;
+        }
+
+        #statusTxt {
+            top: 3px;
+            left: 50%;
+            position: absolute;
+            display: inline-block;
+            color: #FFFFFF;
+        }
+
+        #loadingImg {
+            height: 30px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var options = {
+                target: '#output', // target element(s) to be updated with server response
+                beforeSubmit: beforeSubmit, // pre-submit callback
+                success: afterSuccess, // post-submit callback
+                uploadProgress: OnProgress, //upload progress callback
+                resetForm: true // reset the form after successful submit
+            };
+
+            $("#btnFile").click(function () {
+                $("#upFile").click();
+            });
+
+            $("#upFile").change(function () {
+                // alert($("#upFile").val());
+                $("#uploadForm").submit();
+            });
+
+            $('#uploadForm').submit(function () {
+                $(this).ajaxSubmit(options);
+                // always return false to prevent standard browser submit and page navigation
+                return false;
+            });
+
+            //function after succesful file upload (when server response)
+            function afterSuccess() {
+                // $('#btnSub').show(); //hide submit button
+                $('#loadingImg').hide(); //hide submit button
+                // $('#progressBox').delay(1000).fadeOut(); //hide progress bar
+            }
+
+            //function to check file size before uploading.
+            function beforeSubmit() {
+                //check whether browser fully supports all File API
+                if (window.File && window.FileReader && window.FileList && window.Blob) {
+
+                    //check empty input filed
+                    if (!$('#upFile').val()) {
+                        $("#output").html("Are you kidding me?");
+                        return false
+                    }
+
+                    var fsize = $('#upFile')[0].files[0].size; //get file size
+                    var ftype = $('#upFile')[0].files[0].type; // get file type
+
+                    //allow file types
+                    switch (ftype) {
+                        case 'image/png':
+                        case 'image/gif':
+                        case 'image/jpeg':
+                        case 'image/pjpeg':
+                        case 'text/plain':
+                        case 'text/html':
+                        case 'application/x-zip-compressed':
+                        case 'application/pdf':
+                        case 'application/msword':
+                        case 'application/vnd.ms-excel':
+                        case 'video/mp4':
+                            break;
+                        default:
+                            $("#output").html("<b>" + ftype + "</b> Unsupported file type!");
+                            return false
+                    }
+
+                    //Allowed file size is less than 5 MB (1048576)
+                    if (fsize > 10 * 1024 * 1024) {
+                        $("#output").html("<b>" + bytesToSize(fsize) +
+                            "</b> Too big file! <br />File is too big, it should be less than 5 MB.");
+                        return false
+                    }
+
+                    // $('#btnSub').hide(); //hide submit button
+                    $('#loadingImg').show(); //hide submit button
+                    $("#output").html("");
+                } else {
+                    //Output error to older unsupported browsers that doesn't support HTML5 File API
+                    $("#output").html(
+                        "Please upgrade your browser, because your current browser lacks some new features we need!"
+                    );
+                    return false;
+                }
+            }
+
+            //progress bar function
+            function OnProgress(event, position, total, percentComplete) {
+                //Progress bar
+                $('#progressBox').show();
+                $('#progressBar').width(percentComplete + '%') //update progressbar percent complete
+                $('#statusTxt').html(percentComplete + '%'); //update status text
+                if (percentComplete > 50) {
+                    $('#statusTxt').css('color', '#000'); //change status text to white after 50%
+                }
+            }
+
+            //function to format bites bit.ly/19yoIPO
+            function bytesToSize(bytes) {
+                var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                if (bytes == 0) return '0 Bytes';
+                var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+                return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+            }
+        });
+    </script>
+    <div id="upload-wrapper">
+        <h3>Ajax File Uploader</h3>
+        <form action="upload.php" method="post" enctype="multipart/form-data" id="uploadForm">
+            <ul>
+                <li>
+                    <input name="upFile" id="upFile" type="file" />
+                    <input type="button" id="btnFile" value="Upload" />
+                </li>
+                <li>
+                    <!-- <input type="submit" id="btnSub" value="Upload" /> -->
+                </li>
+                <li>
+                    <img src="loading.gif" id="loadingImg" alt="Please Wait" />
+                </li>
+            </ul>
+        </form>
+        <div id="progressBox">
+            <div id="progressBar"></div>
+            <div id="statusTxt">0%</div>
+        </div>
+        <div id="output">
+        </div>
+    </div>
+</body>
+
+</html>
