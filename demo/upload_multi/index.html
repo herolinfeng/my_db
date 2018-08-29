@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>基于Ajax+PHP的单文件、多文件异步上传实例</title>
+    <style>
+        * {
+            padding: 0px;
+            margin: 0px;
+            font-size: 16px;
+        }
+        .control{
+            width: 50%;
+            margin-right: auto;
+            margin-left: auto;
+            margin-top: 50px;
+            padding: 50px;
+            border-radius: 20px;
+            background: #f0f0f0;
+        }
+        p{
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+        ul {
+            list-style: none;
+        }
+        .progress {
+            position: relative;
+            width: 400px;
+            border: 1px solid #ddd;
+            padding: 1px;
+            border-radius: 3px;
+        }
+        .bar {
+            background-color: #B4F5B4;
+            width: 0%;
+            height: 20px;
+            border-radius: 3px;
+        }
+        .percent {
+            position: absolute;
+            display: inline-block;
+            top: 3px;
+            left: 48%;
+        }
+        #view li {
+            float: left;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            width: 120px;
+            height: 120px;
+            overflow: hidden;
+            position: relative;
+        }
+        .clear{
+            clear: both;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="control">
+        <form id="uploadForm">
+            <p>多文件上传文件：</p>
+            <input type="file" name="file" id="file1" multiple />
+            <input type="button" value="上传" onclick="doUpload()" />
+            <div id="status-bar">
+                <!-- <div class="progress">
+                <div class="bar" style="width: 0%">
+                </div>
+            </div> -->
+            </div>
+            <div id="tip"></div>
+        </form>
+        <div id="view">
+            <ul></ul>
+            <div class="clear"></div>
+        </div>
+    </div>
+
+    <!-- https://blog.csdn.net/huangxin112/article/details/74956462/ -->
+
+    <script src="../../view/resource/jquery-3.3.1.min.js"></script>
+    <script>
+        // $("#file1").click(function () {
+        //     this.change(function () {
+
+        //     });
+        // });
+
+        function doUpload() {
+            var formData = new FormData();
+            var files = $("#file1")[0].files; //等价于document.getElementById("file1").files;  
+            $("#status-bar").html("");
+            $("#tip").text("");
+            if(files.length>5) {
+                $("#tip").text("选择文件数量超过5个，系统只上传前面5个");
+            }
+            for (var i = 0; i < files.length && i < 5; i++) {
+                // console.log(files[i]);
+                // formData.append("fileupload[]", files[i]); // 文件对象 ,fileupload必须加中括号   
+                formData.set("fileupload[]", files[i]);
+                console.log(formData);
+
+                var h = '<div class="progress"><div class="bar" id="bar-' + i + '" style="width: 0%"></div></div>';
+                $("#status-bar").append(h);
+
+                upload(formData, i);
+            }
+        }
+
+        function upload(formData, i) {
+            $.ajax({
+                url: 'upload.php',
+                type: 'post',
+                data: formData,
+                cache: false,
+                processData: false,
+                contentType: false,
+                // async: false,
+                dataType: 'json',
+                xhr: function () {
+                    // 获取ajaxSettings中的xhr对象，为它的upload属性绑定progress事件的处理函数
+                    myXhr = $.ajaxSettings.xhr();
+                    if (myXhr.upload) { //检查upload属性是否存在
+                        //绑定progress事件的回调函数
+                        myXhr.upload.addEventListener('progress', function (e) {
+                            var loaded = e.loaded; //已经上传大小情况
+                            var tot = e.total; //附件总大小
+                            var per = Math.floor(100 * loaded / tot); //已经上传的百分比
+                            console.log(i + "=" + per + "%");
+                            console.log(i + '已经上传大小 = ' + loaded);
+                            console.log(i + '附件总大小 = ' + tot);
+
+                            var percentVal = per + '%';
+                            $("#bar-" + i).width(percentVal)
+                            $("#bar-" + i).html(percentVal);
+                        }, false);
+                    }
+                    return myXhr; //xhr对象返回给jQuery使用
+                },
+                success: function (data) {
+                    console.log("-----------------success----------------");
+                    console.log(data);
+                    if (data.code == 200) {
+                        $("#view ul").append(
+                            "<li><img style='position:absolute' onload='LoadImg(this, 120, 120)' src='" +
+                            data.datas.filename + "'/></li>");
+                    } else {
+                        console.log(data);
+                    }
+                }
+            });
+        }
+
+        function LoadImg(imgID, width_s, height_s) {
+            var image = new Image();
+            image.src = imgID.src;
+            if (image.width > 0 && image.height > 0) {
+                flag = true;
+                if (image.width / image.height <= width_s / height_s) {
+                    imgID.width = width_s;
+                    var height = (image.height * width_s) / image.width;
+                    imgID.height = height;
+                    imgID.style.marginTop = -(height - height_s) / 2 + "px";
+                    // alert("marginTop：" + imgID.style.marginTop);
+                } else {
+                    imgID.height = height_s;
+                    var width = (image.width * height_s) / image.height;
+                    imgID.width = width;
+                    imgID.style.marginLeft = -(width - width_s) / 2 + "px";
+                    // imgID.style.marginTop = "-16px";
+                    // alert("marginLeft：" + imgID.style.marginLeft);
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,164 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>multiple</title>
+    <style type="text/css">
+        body {
+            padding: 30px
+        }
+
+        form {
+            display: block;
+            margin: 20px auto;
+            background: #eee;
+            border-radius: 10px;
+            padding: 15px
+        }
+
+        .progress {
+            position: relative;
+            width: 400px;
+            border: 1px solid #ddd;
+            padding: 1px;
+            border-radius: 3px;
+        }
+
+        .bar {
+            background-color: #B4F5B4;
+            width: 0%;
+            height: 20px;
+            border-radius: 3px;
+        }
+
+        .percent {
+            position: absolute;
+            display: inline-block;
+            top: 3px;
+            left: 48%;
+        }
+
+        #show li {
+            float: left;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            width: 120px;
+            height: 120px;
+            overflow: hidden;
+            position: relative;
+        }
+    </style>
+    <script src="../../view/resource/jquery-3.3.1.min.js"></script>
+    <script src="../../view/resource/jquery.form.min.js"></script>
+</head>
+
+<body>
+    <form action="" id="myform" method="post" enctype="multipart/form-data">
+        <div>
+            <label for="exampleInputFile">上传文件</label>
+            <input type="file" name="myfile[]" id="exampleInputFile" multiple="multiple">
+            <!--进度条-->
+            <div class="progress">
+                <div class="bar" style="width: 0%">
+                    <!--<span class="percent">0%</span>-->
+                </div>
+            </div>
+        </div>
+        <button type="submit">提交上传</button>
+    </form>
+    <!--突破预览区域-->
+    <div class="row" id="show">
+        <ul></ul>
+    </div>
+    <script type="text/javascript">
+        function LoadImg(imgID, width_s, height_s) {
+            var image = new Image();
+            image.src = imgID.src;
+            if (image.width > 0 && image.height > 0) {
+                flag = true;
+                if (image.width / image.height <= width_s / height_s) {
+                    imgID.width = width_s;
+                    var height = (image.height * width_s) / image.width;
+                    imgID.height = height;
+                    imgID.style.marginTop = -(height - height_s) / 2 + "px";
+                    // alert("marginTop：" + imgID.style.marginTop);
+                } else {
+                    imgID.height = height_s;
+                    var width = (image.width * height_s) / image.height;
+                    imgID.width = width;
+                    imgID.style.marginLeft = -(width - width_s) / 2 + "px";
+                    // imgID.style.marginTop = "-16px";
+                    // alert("marginLeft：" + imgID.style.marginLeft);
+                }
+            }
+        }
+
+        $(function () {
+            var bar = $('.bar');
+            // var percent = $('.percent');
+            $('#myform').ajaxForm({
+                url: 'upload.php',
+                dataType: 'json',
+                beforeSerialize: function () {},
+                beforeSubmit: function () {
+                    var filesize = $("input[type='file']")[0].files[0].size / 1024 / 1024;
+                    if (filesize > 50) {
+                        console.log("文件大小超过限制，最多50M");
+                        return false;
+                    }
+                },
+                beforeSend: function () {
+                    var percentVal = '0%';
+                    bar.width(percentVal)
+                    bar.html(percentVal);
+                },
+                uploadProgress: function (event, position, total, percentComplete) {
+                    var percentVal = percentComplete + '%';
+                    bar.width(percentVal)
+                    bar.html(percentVal);
+                    console.log(percentVal, position, total);
+                },
+                success: function (data) {
+                    var percentVal = '100%';
+                    bar.width(percentVal);
+                    bar.html(percentVal);
+                    setTimeout(function () {
+                        ShowData(data);
+                    }, 1000);
+                },
+                error: function (err) {
+                    console.log("表单提交异常！" + err.msg);
+                },
+                complete: function (xhr) {
+                    console.log(xhr.responseText);
+                }
+            });
+
+
+
+            function ShowData(data) {
+                console.log(data);
+                if (data.status == 1) {
+                    var str = "";
+                    for (var i = 0; i < data.data.length; i++) {
+                        str += "<li>";
+                        str += "    <img style='position:absolute;' id='img_" + i + "' src='uploads/" + data.data[i] +
+                            "' onload='LoadImg(this, 120, 120)' />";
+                        str += "</li>";
+                    }
+                    $("#show ul").append(str);
+                    console.log('上传成功');
+                } else {
+                    // 进度条初始化为0
+                    $("#show").hide();
+                    var percentVal = '0%';
+                    bar.width(percentVal)
+                    bar.html(percentVal);
+                    console.log(data.data);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

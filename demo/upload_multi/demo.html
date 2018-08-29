@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>基于Ajax+PHP的单文件、多文件异步上传实例</title>
+    <style>
+        #toUploaded span {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <form id="uploadForm">
+        <p>待上传文件名：
+            <span id="toUploaded"></span>
+            <p>多文件上传文件：
+                <input type="file" name="file" id="file1" multiple/>
+            </p>
+            <p>单文件上传文件：
+                <input type="file" name="file" id="file2" />
+            </p>
+            <p>单文件上传文件：
+                <input type="file" name="file" id="file3" />
+            </p>
+            <input type="button" value="上传" onclick="doUpload()" />
+    </form>
+
+    <script src="../../view/resource/jquery-3.3.1.min.js"></script>
+    <script>
+        $(function () {
+            $('input[name="file"]').change(function (event) {
+                if ($(this).attr('multiple') == 'multiple') { //多文件上传
+                    var filePaths = $(this)[0].files;
+                    $('.file_multiple').remove(); //重选时，删掉原来已选的
+                    for (var i = 0; i < filePaths.length; i++) {
+                        if (filePaths[i].name) {
+                            $('#toUploaded').append("<span class='file_multiple'>" + filePaths[i].name +
+                                "</span>");
+                        }
+                    }
+                } else { //单文件上传
+                    var val = $(this).val();
+                    if (val) {
+                        var id = $(this).attr('id');
+                        $('.' + id).remove(); //重选时，删掉原来已选的
+                        $('#toUploaded').append("<span class='" + id + "'>" + val.substr(val.lastIndexOf(
+                            '\\') + 1) + "</span>");
+                    }
+                }
+            });
+        })
+
+        function doUpload() {
+            var formData = new FormData();
+            //知识拓展
+            //  jquery选择器 $(#id) 返回的是jquery对象，用document.getElementById( id )返回的是DOM对象。
+            // （1）jquery对象可以使用两种方式转换为DOM对象， [index]和.get(index)
+            //  $(#id)[0]   得到DOM对象
+            //  $(#id).get( 0 )   -----》  DOM对象
+            // （2）DOM对象转成jquery对象：
+            //  $(DOM对象）
+            var files = $("#file1")[0].files; //等价于document.getElementById("file1").files;  
+            for (var i = 0; i < files.length; i++) {
+                formData.append("fileupload[]", files[i]); // 文件对象 ,fileupload必须加中括号   
+            }
+            formData.append("fileupload[]", $('#file2')[0].files[0]);
+            formData.append("fileupload[]", $('#file3')[0].files[0]);
+            $.ajax({
+                url: 'upload.php',
+                type: 'post',
+                data: formData,
+                cache: false,
+                processData: false,
+                contentType: false,
+                async: false,
+                dataType: 'json',
+                success: function (data) {
+                    if (data.code == 200) {
+                        console.log(data);
+                    } else {
+                        console.log(data);
+                    }
+                }
+            })
+        }
+    </script>
+</body>
+
+</html>

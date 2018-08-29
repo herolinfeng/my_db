@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>ajax+FormData+javascript 实现无刷新表单注册</title>
+    <script type="text/javascript">
+        window.onload = function () {
+            var fm = document.getElementsByTagName("form")[0];
+
+            fm.onsubmit = function () {
+
+                var fmdata = new FormData();
+
+                var files = document.getElementById("nfile").files; //等价于document.getElementById("file1").files;  
+                console.log(files.length);
+                for (var i = 0; i < files.length; i++) {
+                    console.log(files[i]);
+                    fmdata.set("fileupload", files[i]); // 文件对象 ,fileupload必须加中括号  
+                    console.log(fmdata);
+                    upload(fmdata);
+                }
+
+                return false;
+
+            }
+
+        }
+
+        function upload(fmdata) {
+            document.getElementById("jdn").style.width = 0;
+            document.getElementById("jdn").innerHTML = 0;
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    eval("var obj=" + xhr.responseText);
+
+                    document.getElementById("scjg").innerHTML = obj.jg;
+                    if (obj.name != null) {
+                        document.getElementById("sctp").innerHTML +=
+                            '<img src=\"' + obj.name +
+                            '\" width="89" height="70"  alt=""/>';
+                    }
+                }
+
+            }
+
+            //设置监听事件ajax.upload.onprogress
+            xhr.upload.onprogress = function (evt) {
+                //感知附件上传情况，利用事件感知
+                //console.log(evt);
+                var loaded = evt.loaded;
+                var total = evt.total;
+                var per = Math.floor((loaded / total) * 100) + "%";
+                document.getElementById("jdn").style.width = per;
+                document.getElementById("jdn").innerHTML = per;
+            }
+            xhr.open("POST", "test_back.php");
+            //使用formData不用设置表头
+            //xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+            xhr.send(fmdata);
+        }
+    </script>
+    <style>
+        #jdw {
+            margin: 10px;
+            height: 20px;
+            border: solid 1px #666;
+            width: 200px;
+        }
+
+        #jdn {
+            height: 20px;
+            background-color: #F00;
+            width: 0px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="scjg"></div>
+    <div id="sctp"></div>
+    ajax+FormData+javascript 实现无刷新表单注册
+    <form method="post">
+        <div id="jdw">
+            <div id="jdn"></div>
+        </div>
+        文件
+        <input name="nfile" type="file" id="nfile" multiple>
+        <br>
+        <input type="submit" value="提交">
+    </form>
+</body>
+
+</html>

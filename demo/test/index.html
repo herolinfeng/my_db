@@ -1,0 +1,52 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>ajax 多文件上传</title>
+</head>
+
+<body>
+    <script type="text/javascript">
+        function uploadFile() {
+            $(".file").change(function () {
+                var formData2 = $(this).parent(); //得到表单
+                $.ajax({
+                    url: 'xxx&r=' + Math.random(),
+                    type: 'POST',
+                    Accept: 'text/html;charset=UTF-8',
+                    cache: false,
+                    contentType: "multipart/form-data",
+                    data: new FormData(formData2[0]),
+                    processData: false, //必须false才会避开jQuery对 formdata 的默认处理
+                    contentType: false, //必须false才会自动加上正确的Content-Type
+                    xhr: function () {
+                        // 获取ajaxSettings中的xhr对象，为它的upload属性绑定progress事件的处理函数
+                        myXhr = $.ajaxSettings.xhr();
+                        if (myXhr.upload) { //检查upload属性是否存在
+                            //绑定progress事件的回调函数  
+                            myXhr.upload.addEventListener('progress', function (e) {
+                                var loaded = e.loaded; //已经上传大小情况
+                                var tot = e.total; //附件总大小
+                                var per = Math.floor(100 * loaded / tot); //已经上传的百分比
+                                $("#son").html(per + "%");
+                                $("#son").css("width", per + "%");
+                                console.log('附件总大小 = ' + loaded);
+                                console.log('已经上传大小 = ' + tot);
+                            }, false);
+                        }
+                        return myXhr; //xhr对象返回给jQuery使用
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        console.log("上传成功!!!!");
+                    },
+                    error: function () {
+                        console.log("上传失败！");
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>AJAX上传文件进度条的实现原理</title>
+    <script type="text/javascript" src="../../view/resource/jquery-3.3.1.min.js"></script>
+</head>
+
+<body>
+    <input type="file" onchange="uploadFile()" />
+</body>
+
+<script>
+    function uploadFile(event) {
+
+        var e = window.event || event;
+        var oFile = e.target.files[0];
+
+        var oData = new FormData();
+        oData.append("file", oFile);
+
+        //上传进度监听方法
+        var xhrOnProgress = function (fun) {
+            xhrOnProgress.onprogress = fun; //绑定监听
+            //使用闭包实现监听绑
+            return function () {
+                //通过$.ajaxSettings.xhr();获得XMLHttpRequest对象
+                var xhr = $.ajaxSettings.xhr();
+                //判断监听函数是否为函数
+                if (typeof xhrOnProgress.onprogress !== 'function')
+                    return xhr;
+                //如果有监听函数并且xhr对象支持绑定时就把监听函数绑定上去
+                if (xhrOnProgress.onprogress && xhr.upload) {
+                    xhr.upload.onprogress = xhrOnProgress.onprogress;
+                }
+                return xhr;
+            }
+        }
+
+        $.ajax({
+            type: "post",
+            url: "", //这里加上你自己的上传地址
+            processData: false, //关闭jquery对文件的预处理
+            data: oData,
+            xhr: xhrOnProgress(function (e) {
+                //关键数据
+                /*稍微处理一下，看看控制台的打印数据就是上传的进度，
+                 想要看明白，就控制一下你的网速，在浏览器控制台的
+                 Network选项里面可以选择网速，选择fast 3g就可以啦。*/
+                var percent = e.loaded / e.total;
+            }),
+            success: function (r) {
+                console.log(r);
+            }
+        });
+
+    }
+</script>
+
+</html>

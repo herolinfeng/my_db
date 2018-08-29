@@ -61,6 +61,7 @@
             width: 50%;
             margin-right: auto;
             margin-left: auto;
+            margin-top: 5px
         }
 
         #output ul li {
@@ -71,6 +72,7 @@
             border-radius: 10px;
             margin-left: 5px;
             margin-bottom: 5px;
+            position: relative;
         }
 
         /* prograss bar */
@@ -103,7 +105,7 @@
 
         #loadingImg {
             height: 30px;
-            display: none;
+            display: none
         }
     </style>
 </head>
@@ -138,7 +140,9 @@
                 var res = $.parseJSON(data);
                 console.log(typeof res);
                 if (res.id == 100) {
-                    $("#output ul").append("<li><img onload='DrawImage(this, 100, 100)' src='" + res.msg +
+                    $("#output ul").append(
+                        "<li><img style='position:absolute' onload='DrawImage(this, 100, 100)' src='" + res
+                        .msg +
                         "'/></li>");
                 } else {
                     alert(res.msg);
@@ -218,14 +222,14 @@
                     var height = (image.height * width_s) / image.width;
                     ImgID.height = height;
                     ImgID.style.marginTop = -(height - height_s) / 2 + "px";
-                    alert("marginTop：" + ImgID.style.marginTop);
+                    // alert("marginTop：" + ImgID.style.marginTop);
                 } else {
                     ImgID.height = height_s;
                     var width = (image.width * height_s) / image.height;
                     ImgID.width = width;
                     ImgID.style.marginLeft = -(width - width_s) / 2 + "px";
-                    ImgID.style.marginTop = "-16px";
-                    alert("marginLeft：" + ImgID.style.marginLeft);
+                    // ImgID.style.marginTop = "-16px";
+                    // alert("marginLeft：" + ImgID.style.marginLeft);
                 }
             }
         }
